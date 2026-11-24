@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="TaskBoard — plan it, ship it.">
+  <title>TaskBoard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="32" height="32">
+          <defs>
+            <linearGradient id="logo-g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8b5cf6"/>
+              <stop offset="1" stop-color="#22d3ee"/>
+            </linearGradient>
+          </defs>
+          <rect width="32" height="32" rx="9" fill="url(#logo-g)"/>
+          <path d="M9 16.5l4.5 4.5L23 11.5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="brand-name">Task<b>Board</b></span>
+    </a>
+
+    <div class="topbar-right">
+      <span id="health" class="health" title="Readiness check (/readyz)">
+        <span class="dot"></span><span class="health-label">Connecting</span>
+      </span>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle light/dark theme"></button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow" id="today"></p>
+        <h1>Plan it. <span class="grad">Ship it.</span></h1>
+        <p class="sub">Capture work, drag it across the board, and watch it land in Done.</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat glass">
+          <span class="stat-label">Total tasks</span>
+          <span class="stat-value" id="stat-total">0</span>
+        </div>
+        <div class="stat glass">
+          <span class="stat-label">In progress</span>
+          <span class="stat-value" id="stat-progress">0</span>
+        </div>
+        <div class="stat glass">
+          <span class="stat-label">High priority</span>
+          <span class="stat-value" id="stat-high">0</span>
+        </div>
+        <div class="stat glass ring-stat">
+          <svg class="ring" viewBox="0 0 60 60" width="56" height="56" aria-hidden="true">
+            <defs>
+              <linearGradient id="ring-g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8b5cf6"/>
+                <stop offset="1" stop-color="#22d3ee"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="30" cy="30" r="24"/>
+            <circle class="ring-fg" id="ring-fg" cx="30" cy="30" r="24"/>
+          </svg>
+          <div>
+            <span class="stat-label">Completed</span>
+            <span class="stat-value" id="stat-done-pct">0%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <form id="task-form" class="composer glass" autocomplete="off">
+      <div class="composer-main">
+        <input id="title" name="title" type="text" class="composer-title"
+               placeholder="What needs to be done?" maxlength="200" required>
+        <input id="description" name="description" type="text" class="composer-desc"
+               placeholder="Add a few details (optional)" maxlength="2000">
+      </div>
+      <div class="composer-side">
+        <div class="segmented" role="radiogroup" aria-label="Priority">
+          <input type="radio" name="priority" id="p-low" value="low">
+          <label for="p-low" class="seg-low">Low</label>
+          <input type="radio" name="priority" id="p-medium" value="medium" checked>
+          <label for="p-medium" class="seg-medium">Medium</label>
+          <input type="radio" name="priority" id="p-high" value="high">
+          <label for="p-high" class="seg-high">High</label>
+        </div>
+        <button type="submit" class="btn-primary">
+          <span class="plus" aria-hidden="true">+</span> Add task
+        </button>
+      </div>
+    </form>
+
+    <div class="toolbar">
+      <label class="search glass">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="search" type="search" placeholder="Search tasks…" aria-label="Search tasks">
+        <kbd>/</kbd>
+      </label>
+      <div class="chips" id="filters" role="group" aria-label="Filter by priority">
+        <button type="button" class="chip active" data-filter="all">All</button>
+        <button type="button" class="chip" data-filter="high"><i class="pdot high"></i>High</button>
+        <button type="button" class="chip" data-filter="medium"><i class="pdot medium"></i>Medium</button>
+        <button type="button" class="chip" data-filter="low"><i class="pdot low"></i>Low</button>
+      </div>
+    </div>
+
+    <section class="board">
+      <div class="column glass" data-status="todo" style="--col: var(--c-todo)">
+        <header class="col-head">
+          <span class="col-dot"></span>
+          <h2>To Do</h2>
+          <span class="count" data-count="todo">0</span>
+        </header>
+        <ul class="cards" data-status="todo"></ul>
+      </div>
+
+      <div class="column glass" data-status="in_progress" style="--col: var(--c-progress)">
+        <header class="col-head">
+          <span class="col-dot"></span>
+          <h2>In Progress</h2>
+          <span class="count" data-count="in_progress">0</span>
+        </header>
+        <ul class="cards" data-status="in_progress"></ul>
+      </div>
+
+      <div class="column glass" data-status="done" style="--col: var(--c-done)">
+        <header class="col-head">
+          <span class="col-dot"></span>
+          <h2>Done</h2>
+          <span class="count" data-count="done">0</span>
+        </header>
+        <ul class="cards" data-status="done"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div id="meta" class="meta"><span class="meta-chip">loading app info…</span></div>
+    <p class="hint">Press <kbd>N</kbd> for a new task · <kbd>/</kbd> to search · double-click a card to edit</p>
+  </footer>
+
+  <dialog id="edit-dialog" class="modal">
+    <form id="edit-form" class="modal-body">
+      <h3>Edit task</h3>
+      <label class="field">
+        <span>Title</span>
+        <input name="title" type="text" maxlength="200" required>
+      </label>
+      <label class="field">
+        <span>Description</span>
+        <textarea name="description" rows="4" maxlength="2000"></textarea>
+      </label>
+      <div class="field-row">
+        <label class="field">
+          <span>Status</span>
+          <select name="status">
+            <option value="todo">To Do</option>
+            <option value="in_progress">In Progress</option>
+            <option value="done">Done</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Priority</span>
+          <select name="priority">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="edit-cancel">Cancel</button>
+        <button type="submit" class="btn-primary">Save changes</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
